@@ -1,5 +1,5 @@
 # BreakingRainbow
-Scripts for the 'Breaking Rainbow takes a Weekend on a Laptop' paper
+Scripts for the 'Breaking Rainbow takes a Weekend on a Laptop' paper.
 
 We have the following scripts: 
 
