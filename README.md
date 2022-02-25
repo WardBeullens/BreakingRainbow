@@ -20,7 +20,7 @@ So in the XL Makefile you should set
     M = 63
     N = 30
 
-You can then run the XL algorithm with:
+After compiling, you can then run the XL algorithm with:
 
     ./xl --challenge system63-30.txt --all
 
