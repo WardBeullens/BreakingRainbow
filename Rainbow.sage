@@ -52,7 +52,7 @@ def Keygen(q,n,m,o2):
     
     O1 = S.inverse() * Matrix(K, [ basis_Fn[i] for i in range(n-m,n) ] ).transpose()
     O2 = S.inverse() * Matrix(K, [ basis_Fn[i] for i in range(n-o2,n) ] ).transpose()
-    W =  T * Matrix(K, [ basis_Fm[i] for i in range(o2,m) ] ).transpose()
+    W =  T * Matrix(K, [ basis_Fm[i] for i in range(m-o2,m) ] ).transpose()
 
     return Public_Key, O2, O1, W
 

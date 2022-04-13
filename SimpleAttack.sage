@@ -1,20 +1,16 @@
-# this script generates a public key, makes a *good* guess (we 'cheat' by using the sk). And writes the P-tilde/P-hat system to a file 
+# this script generates a public key, make a *good* guess (we 'cheat' by using the sk). And writes the P-tilde system to a file 
 # in a format that is readable by the Block Wiedemann XL algorihm of Niederhagen
 
-load('Rainbow.sage')
-
-q = 16
-K = GF(q)
-n = 96
-m = 64
-o2 = 32
-
-attempts = 0
 
 def elt_to_str(a):
     if q == 16:
         return str(hex(sum([2**i * a.polynomial()[i].lift() for i in range(4)])))[2:]
     return str(a)
+
+D = { elt_to_str(a): a for a in K }
+
+def str_to_elt(str):
+    return D[str]   
 
 basis_Fn = (K**n).basis()
 basis_Fm = (K**m).basis()
@@ -99,7 +95,14 @@ def Attack(PK, O2 = None):
     print("System written to: " + fname )
     print("Use block Wiedemann XL algorithm of Niederhagen to find a solution:")
     print("http://polycephaly.org/projects/xl")
+    return x,fname,D_x_ker
 
-PK, O2, O1, W = Keygen(q,n,m,o2)
-Attack(PK,O2)
-#Attack(PK)
+#load('Rainbow.sage')
+#q = 16
+#K = GF(q)
+#n = 96
+#m = 64
+#o2 = 32
+#attempts = 0
+#PK, O2, O1, W = Keygen(q,n,m,o2)
+#Attack(PK,O2)

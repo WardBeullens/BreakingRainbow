@@ -1,0 +1,100 @@
+Q = 16
+M = 39
+N = 18
+
+
+BW1_AlGO = BW1
+
+## four choices using MPI:
+#BW1_ALGO = BW1_two_blocks
+#BW1_ALGO = BW1_one_block
+#BW1_ALGO = BW1_two_blocks_ibv
+
+## this one requires the number of MPI nodes to be specified at compile time
+#BW1_ALGO = BW1_mpi_size_blocks
+#MPI_SIZE = 2
+
+D = $(shell sage ./get_D.sage -q $Q -m $M -n $N)
+
+DEFINES= -DQQ=$(Q) -DMM=$(M) -DNN=$(N) -DDD=$(D) \
+         -D$(MPI)=$(MPI) \
+         -DISEND -DBW1_ALGO=$(BW1_ALGO)
+
+DEFINES+= -DMAX_D=$(D)
+
+#DEFINES+= -DHAVE_HUGEPG
+
+ifeq ($(BW1_ALGO), BW1)
+MPI = NO_MPI
+else
+MPI = MPI
+endif
+
+ifeq ($(BW1_ALGO), BW1_mpi_size_blocks)
+ifndef MPI_SIZE
+$(error MUST define MPI_SIZE when using BW1_mpi_size_blocks)
+else
+DEFINES+= -DMPI_BLOCKS=$(MPI_SIZE)
+DEFINES+= -DMPI_SIZE=$(MPI_SIZE)
+endif
+else
+DEFINES+= -DMPI_BLOCKS=2
+endif
+
+ifeq ($(BW1_ALGO), BW1_two_blocks_ibv)
+IBV = xl_ibv_comm.o
+DEFINES+= -DIBV
+endif
+
+CXX=   g++
+LD=    g++
+
+CXXFLAGS= -O3 -fopenmp -Wall $(DEFINES) -march=native -mtune=native -Wfatal-errors
+#CXXFLAGS= -O3 -Wall $(DEFINES) -march=native -mtune=native -Wfatal-errors
+#CXXFLAGS= -g -fopenmp -Wall $(DEFINES) -march=native -mtune=native -Wfatal-errors
+#CXXFLAGS= -g -Wall $(DEFINES) -march=native -mtune=native -Wfatal-errors
+
+LDFLAGS= 
+LIBPATH= 
+LIBS= -lnuma
+
+ifndef SAGE
+SAGE=sage
+endif
+
+ifeq ($(MPI), MPI)
+ifeq ($(MPI_SUFFIX), _mpich2)
+LIBS+= -lmpich
+DEFINES+= -DOPEN_MPI
+else
+LIBS+= -lmpi -libverbs
+endif
+endif
+
+ifeq ($(MPI), MPI)
+	CC = mpicc	
+	CXX = mpic++
+	LD = mpic++
+endif
+
+ifeq ($(DEBUG), 0)
+	CFLAGS+= -DNDEBUG
+endif
+
+.PHONY: all
+all: xl
+
+options.o: options.cpp options.h util.h Makefile
+	$(CXX) options.cpp $(LDFLAGS) $(LIBPATH) $(CXXFLAGS) $(LIBS) -c
+
+xl_ibv_comm.o: ibv/xl_ibv_comm.c ibv/xl_ibv_comm.h Makefile
+	mpicc $(DEFINES) ibv/xl_ibv_comm.c -libverbs -lmpi -D_GNU_SOURCE -std=gnu99 -c
+
+xl: main.cpp *.h Makefile options.o params.h $(IBV)
+	$(CXX) main.cpp $(LDFLAGS) $(LIBPATH) $(CXXFLAGS) $(LIBS) options.o $(IBV) -o xl
+
+
+.PHONY: clean
+clean:
+	rm -f xl options.o xl_ibv_comm.o get_D.py
+
