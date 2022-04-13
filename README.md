@@ -9,6 +9,13 @@ We have the following scripts:
 - SimpleAttackStatistics.sage: Counts how many guesses are good.
 - Rainbow.sage: Used by the other scripts to generate a Rainbow public key
 
+## Demonstration of the full attack
+
+The "Attack_demo" folder contains two sage scripts that demonstrate the full attack.
+
+Running KeyGen creates a rainbow key pair and writes the public key to a file. By default a toy parameter set is used, but the parameters can be changed in the script.
+
+Running the Full_Attack.sage compiles the WXL algorithm, and repeatedly makes a guess x, builds an MQ system and tries to solve it. Once a solution is found it completes the key recovery attack, writes the recovered secret key to a file, and compares it to the original secret key to verify that the attack is succesfull.
 
 ## using the wiedemann XL implmentation of Niederhagen et al.
 The SimpleAttack.sage script creates a file named 'systemN-M.txt' for some values of N, M. You need to compile the wiedemann XL implementation with these values of N,M.
